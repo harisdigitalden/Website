@@ -5,13 +5,14 @@ import { map } from 'rxjs';
 import { ApiService } from '../core/api.service';
 import { Icon } from '../shared/icon';
 import { whatsappLink } from '../site.config';
+import { ServiceArt } from './service-art';
 import { ServicesOrbit } from './services-orbit';
 
 // Services as individual tabs, under the animated services illustration.
 // Link to a tab with /services?tab=<slug>.
 @Component({
   selector: 'app-services-grid',
-  imports: [RouterLink, Icon, ServicesOrbit],
+  imports: [RouterLink, Icon, ServicesOrbit, ServiceArt],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="section services" [class.section--soft]="soft()" id="services">
@@ -69,8 +70,7 @@ import { ServicesOrbit } from './services-orbit';
               </div>
               <div class="panel-art" aria-hidden="true">
                 <span class="art-ring r1"></span>
-                <span class="art-ring r2"></span>
-                <span class="art-icon"><app-icon [name]="s.icon" [size]="72" /></span>
+                <app-service-art [slug]="s.slug" />
                 <span class="art-step">{{ indexOf(s.slug) + 1 }} / {{ services().length }}</span>
               </div>
             </div>
@@ -111,14 +111,8 @@ import { ServicesOrbit } from './services-orbit';
 
     .panel-art { position: relative; height: 300px; display: grid; place-items: center; }
     .art-ring { position: absolute; border-radius: 50%; border: 1px dashed rgba(216, 174, 98, 0.4); animation: turn 30s linear infinite; }
-    .r1 { width: 260px; height: 260px; }
-    .r2 { width: 190px; height: 190px; border-style: solid; border-color: rgba(216, 174, 98, 0.2); animation-direction: reverse; }
+    .r1 { width: 290px; height: 290px; }
     @keyframes turn { to { transform: rotate(360deg); } }
-    .art-icon {
-      width: 140px; height: 140px; border-radius: 36px; display: grid; place-items: center; color: var(--on-gold);
-      background: var(--gradient); box-shadow: 0 0 60px rgba(216, 174, 98, 0.35); animation: hover 4s ease-in-out infinite;
-    }
-    @keyframes hover { 0%, 100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-10px) rotate(4deg); } }
     .art-step { position: absolute; bottom: 8px; right: 8px; font: 600 0.8rem var(--font-head); color: var(--muted); letter-spacing: 0.1em; }
     .empty { text-align: center; color: var(--muted); }
   `,
