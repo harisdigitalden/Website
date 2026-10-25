@@ -1,5 +1,4 @@
-// Business details shown across the site. The email is still a placeholder —
-// replace it with your real address.
+// Business details shown across the site.
 export const SITE = {
   name: "Hari's Digital Den",
   tagline: 'Brand | Content | Growth',

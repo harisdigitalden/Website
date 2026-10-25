@@ -12,6 +12,7 @@ import (
 type apiHandler struct {
 	store   *enquiryStore
 	limiter *rateLimiter
+	mailer  *mailer // nil when email isn't configured
 }
 
 func (h *apiHandler) health(w http.ResponseWriter, _ *http.Request) {
@@ -96,6 +97,9 @@ func (h *apiHandler) contact(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("new enquiry %s from %s (%s) for %s", enq.ID, enq.Name, enq.Phone, enq.Service)
+	if h.mailer != nil {
+		h.mailer.notifyAsync(enq)
+	}
 	writeJSON(w, http.StatusCreated, map[string]string{
 		"id":      enq.ID,
 		"message": "Thank you! Our team will call you within 24 hours.",

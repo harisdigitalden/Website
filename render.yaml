@@ -1,4 +1,4 @@
-# Render Blueprint: deploys the site as one free web service.
+# Render Blueprint: deploys the site as one web service.
 # The service name becomes the URL: https://harisdigitalden.onrender.com
 services:
   - type: web
@@ -7,3 +7,16 @@ services:
     plan: free
     healthCheckPath: /api/health
     autoDeploy: true
+    # Email every consultation form to the company inbox. Render asks for
+    # these values on first deploy (sync: false keeps them out of git).
+    envVars:
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: NOTIFY_TO
+        sync: false

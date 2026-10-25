@@ -67,7 +67,21 @@ These use Instagram's official embeds, so nothing is downloaded. In `backend/con
 Restart the Go server after editing (no frontend rebuild needed).
 | POST   | `/api/contact`      | Validated (Indian mobile, email), rate limited, honeypot spam filter |
 
-Contact enquiries are saved to `backend/data/enquiries.jsonl`.
+Contact enquiries are saved to `backend/data/enquiries.jsonl` and, when email is configured, sent to the company inbox.
+
+### Getting consultation forms in your company email
+Set these environment variables (on Render: **Service → Environment**). Without them the site still works, but enquiries only go to the file above.
+
+| Variable | Example | Notes |
+|---|---|---|
+| `SMTP_HOST` | `smtp.gmail.com` / `smtp.zoho.in` | Your email provider's SMTP server |
+| `SMTP_PORT` | `587` | STARTTLS port (default 587) |
+| `SMTP_USER` | `hello@yourdomain.com` | Login, usually the full address |
+| `SMTP_PASS` | *(app password)* | Gmail/Workspace: create an **App Password** (needs 2-step verification). Zoho: an app-specific password |
+| `NOTIFY_TO` | `hello@yourdomain.com` | Where enquiries arrive; comma-separate several |
+| `NOTIFY_FROM` | *(optional)* | Sender address, defaults to `SMTP_USER` |
+
+Each email has the customer's details, a **Reply on WhatsApp** button, and **Reply** goes straight to the customer's email.
 
 ## Before going live: replace the placeholders
 
