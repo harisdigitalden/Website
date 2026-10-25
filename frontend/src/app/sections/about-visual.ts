@@ -1,166 +1,232 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { Icon } from '../shared/icon';
 
-// Animated "studio" scene for the About page: the logo inside spinning
-// camera-lens rings, surrounded by floating cards for the work we do.
+type Tile =
+  | { kind: 'logo'; src: string; alt: string; tall?: boolean; light?: boolean }
+  | { kind: 'word'; text: string }
+  | { kind: 'social'; icon: string; label: string; bg: string }
+  | { kind: 'web' }
+  | { kind: 'app' }
+  | { kind: 'chart' }
+  | { kind: 'palette' }
+  | { kind: 'ledger' }
+  | { kind: 'quote' };
+
+// About page visual: a 3D-tilted "creative wall" — three columns of work tiles
+// scrolling endlessly in opposite directions, tilting gently with the mouse.
 @Component({
   selector: 'app-about-visual',
   imports: [Icon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="scene" aria-hidden="true">
-      <div class="lens">
-        <span class="ring r1"></span>
-        <span class="ring r2"></span>
-        <span class="ring r3"><i></i><i></i><i></i></span>
-        <span class="flash"></span>
-        <div class="core"><img src="images/logo-full.png" alt="" /></div>
+    <div class="stage" aria-hidden="true" (pointermove)="tilt($event)" (pointerleave)="reset()">
+      <div class="wall" [style.--rx.deg]="rx()" [style.--ry.deg]="ry()">
+        @for (col of columns; track $index; let c = $index) {
+          <div class="col" [class.down]="c === 1" [style.--speed.s]="speeds[c]">
+            <div class="strip">
+              @for (t of col.concat(col); track $index) {
+                @switch (t.kind) {
+                  @case ('logo') {
+                    <div class="tile logo" [class.tall]="t.tall" [class.light]="t.light"><img [src]="t.src" [alt]="t.alt" /></div>
+                  }
+                  @case ('word') {
+                    <div class="tile word"><span>{{ t.text }}</span></div>
+                  }
+                  @case ('social') {
+                    <div class="tile social" [style.background]="t.bg">
+                      <app-icon [name]="t.icon" [size]="34" />
+                      <small>{{ t.label }}</small>
+                    </div>
+                  }
+                  @case ('web') {
+                    <div class="tile web">
+                      <div class="bar"><i></i><i></i><i></i></div>
+                      <div class="hero-block"></div>
+                      <div class="row"><span></span><span></span><span></span></div>
+                      <small>Website</small>
+                    </div>
+                  }
+                  @case ('app') {
+                    <div class="tile app">
+                      <div class="phone"><span class="notch"></span><span class="ui"></span><span class="ui short"></span><span class="btn"></span></div>
+                      <small>Mobile App</small>
+                    </div>
+                  }
+                  @case ('chart') {
+                    <div class="tile chart">
+                      <div class="bars"><span></span><span></span><span></span><span></span><span></span></div>
+                      <small>Insights ▲</small>
+                    </div>
+                  }
+                  @case ('palette') {
+                    <div class="tile palette">
+                      <span style="background:#090e13"></span><span style="background:#101b22"></span>
+                      <span style="background:#d8ae62"></span><span style="background:#f3d18d"></span>
+                      <small>Brand Kit</small>
+                    </div>
+                  }
+                  @case ('ledger') {
+                    <div class="tile ledger">
+                      <app-icon name="ledger" [size]="26" />
+                      <div class="lines"><span></span><span></span><span></span></div>
+                      <small>Digital Ledger</small>
+                    </div>
+                  }
+                  @case ('quote') {
+                    <div class="tile quote"><span>“Your Brand.<br /><b>Our Creativity.</b>”</span></div>
+                  }
+                }
+              }
+            </div>
+          </div>
+        }
       </div>
-
-      <!-- Website -->
-      <div class="card web">
-        <div class="bar"><i></i><i></i><i></i><span>yourbrand.in</span></div>
-        <div class="banner"></div>
-        <div class="lines"><span></span><span></span><span class="short"></span></div>
-        <small><app-icon name="web" [size]="12" /> Website</small>
-      </div>
-
-      <!-- Reel -->
-      <div class="card reel">
-        <div class="screen">
-          <span class="play"><app-icon name="arrow" [size]="16" /></span>
-          <span class="heart"><app-icon name="heart" [size]="14" [filled]="true" /></span>
-          <div class="progress"><span></span></div>
-        </div>
-        <small><app-icon name="instagram" [size]="12" /> Reels</small>
-      </div>
-
-      <!-- Brand kit -->
-      <div class="card kit">
-        <div class="swatches">
-          @for (c of palette; track c) {
-            <span [style.background]="c"></span>
-          }
-        </div>
-        <div class="type"><b>Aa</b><span>Poppins · Inter</span></div>
-        <small><app-icon name="branding" [size]="12" /> Brand Kit</small>
-      </div>
-
-      <!-- Growth -->
-      <div class="card growth">
-        <div class="bars">
-          @for (h of bars; track $index) {
-            <span [style.--h.%]="h" [style.animation-delay.ms]="$index * 120"></span>
-          }
-        </div>
-        <strong>▲ Growth</strong>
-        <small><app-icon name="chart" [size]="12" /> Insights</small>
-      </div>
+      <span class="shine"></span>
     </div>
   `,
   styles: `
     :host { display: block; }
-    .scene { --size: min(540px, 90vw); position: relative; width: var(--size); height: var(--size); margin: 0 auto; }
+    .stage {
+      position: relative; height: 580px; perspective: 1400px; overflow: hidden; border-radius: 28px;
+      mask-image: linear-gradient(180deg, transparent, #000 14%, #000 86%, transparent);
+      -webkit-mask-image: linear-gradient(180deg, transparent, #000 14%, #000 86%, transparent);
+    }
+    .wall {
+      --rx: 0deg; --ry: 0deg;
+      position: absolute; inset: -12% -6%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+      transform: rotateX(calc(22deg + var(--rx))) rotateY(calc(-14deg + var(--ry))) rotateZ(8deg);
+      transform-style: preserve-3d; transition: transform 0.4s ease-out;
+    }
+    .col { overflow: visible; }
+    .strip { display: flex; flex-direction: column; gap: 16px; animation: up var(--speed, 30s) linear infinite; }
+    .col.down .strip { animation-name: down; }
+    .stage:hover .strip { animation-play-state: paused; }
+    @keyframes up { from { transform: translateY(0); } to { transform: translateY(calc(-50% - 8px)); } }
+    @keyframes down { from { transform: translateY(calc(-50% - 8px)); } to { transform: translateY(0); } }
 
-    /* Camera lens with the logo */
-    .lens { position: absolute; inset: 18%; border-radius: 50%; }
-    .ring { position: absolute; border-radius: 50%; }
-    .r1 { inset: 0; border: 2px dashed rgba(216, 174, 98, 0.5); animation: spin 26s linear infinite; }
-    .r2 { inset: 7%; border: 6px solid transparent; border-top-color: var(--gold); border-right-color: rgba(216, 174, 98, 0.35); animation: spin 6s linear infinite reverse; }
-    .r3 { inset: 14%; border: 1px solid rgba(216, 174, 98, 0.3); animation: spin 14s linear infinite; }
-    .r3 i { position: absolute; width: 10px; height: 10px; border-radius: 50%; background: var(--champagne); box-shadow: 0 0 14px var(--gold); top: -5px; left: calc(50% - 5px); }
-    .r3 i:nth-child(2) { top: auto; bottom: -5px; }
-    .r3 i:nth-child(3) { top: calc(50% - 5px); left: -5px; }
-    .flash {
-      position: absolute; inset: 22%; border-radius: 50%; background: radial-gradient(circle, rgba(243, 209, 141, 0.55), transparent 70%);
-      animation: flash 5s ease-in-out infinite;
+    .tile {
+      position: relative; border-radius: 18px; padding: 14px; min-height: 120px; overflow: hidden;
+      background: var(--charcoal); border: 1px solid rgba(216, 174, 98, 0.25);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45); transition: transform 0.3s, border-color 0.3s;
     }
-    @keyframes flash { 0%, 80%, 100% { opacity: 0.25; transform: scale(0.9); } 86% { opacity: 1; transform: scale(1.15); } }
-    .core {
-      position: absolute; inset: 21%; border-radius: 50%; display: grid; place-items: center; padding: 9%;
-      background: radial-gradient(circle at 35% 30%, #16242e, var(--obsidian) 75%);
-      border: 2px solid rgba(216, 174, 98, 0.6); box-shadow: 0 0 50px rgba(216, 174, 98, 0.3);
-    }
-    .core img { width: 100%; height: auto; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* Floating work cards */
-    .card {
-      position: absolute; padding: 12px; border-radius: 16px; background: var(--charcoal);
-      border: 1px solid rgba(216, 174, 98, 0.35); box-shadow: 0 20px 44px rgba(0, 0, 0, 0.5);
-      animation: float 6s ease-in-out infinite;
-    }
-    .card small { display: flex; align-items: center; gap: 5px; margin-top: 8px; font: 600 0.7rem var(--font-head); color: var(--champagne); letter-spacing: 0.04em; }
-    @keyframes float {
-      0%, 100% { transform: translateY(0) rotate(var(--tilt, 0deg)); }
-      50% { transform: translateY(-14px) rotate(var(--tilt, 0deg)); }
+    .tile:hover { transform: translateZ(30px) scale(1.04); border-color: var(--gold); }
+    .tile small {
+      position: absolute; left: 14px; bottom: 10px; font: 600 0.68rem var(--font-head); letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--champagne);
     }
 
-    .web { --tilt: -5deg; top: 2%; left: 0; width: 38%; }
-    .bar { display: flex; align-items: center; gap: 4px; margin-bottom: 8px; }
+    .logo { display: grid; place-items: center; min-height: 110px; background: var(--obsidian); }
+    .logo.tall { min-height: 170px; }
+    .logo.light { background: #fff; }
+    .logo img { width: 100%; height: 100%; max-height: 120px; object-fit: contain; }
+
+    .word { display: grid; place-items: center; min-height: 130px; background: var(--gradient); }
+    .word span { font: 800 clamp(1.3rem, 2.4vw, 1.9rem) var(--font-head); color: var(--obsidian); letter-spacing: -0.01em; }
+
+    .social { display: grid; place-items: center; min-height: 130px; color: #fff; border: 0; }
+    .social small { color: rgba(255, 255, 255, 0.9); }
+
+    .web { min-height: 150px; }
+    .bar { display: flex; gap: 4px; margin-bottom: 8px; }
     .bar i { width: 7px; height: 7px; border-radius: 50%; background: #e5484d; }
     .bar i:nth-child(2) { background: #f5a524; }
     .bar i:nth-child(3) { background: #2fbf71; }
-    .bar span { margin-left: 6px; font-size: 0.6rem; color: var(--muted); }
-    .banner { height: 46px; border-radius: 8px; background: var(--gradient); }
-    .lines { display: grid; gap: 5px; margin-top: 8px; }
-    .lines span {
-      height: 6px; border-radius: 3px;
-      background: linear-gradient(90deg, #22303a 0%, #3a4a56 50%, #22303a 100%); background-size: 200% 100%;
-      animation: shimmer 1.8s linear infinite;
-    }
-    .lines .short { width: 60%; }
-    @keyframes shimmer { to { background-position: -200% 0; } }
+    .hero-block { height: 50px; border-radius: 8px; background: var(--gradient); }
+    .row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 8px; }
+    .row span { height: 26px; border-radius: 6px; background: #22303a; }
 
-    .reel { --tilt: 6deg; top: 0; right: 2%; width: 26%; animation-delay: 1s; }
-    .screen {
-      position: relative; aspect-ratio: 9 / 14; border-radius: 10px; overflow: hidden;
-      background: radial-gradient(circle at 30% 25%, #2a3a46, var(--obsidian) 70%);
+    .app { display: grid; place-items: center; min-height: 190px; background: radial-gradient(circle at 50% 30%, #1c2c38, var(--charcoal)); }
+    .phone {
+      position: relative; width: 70px; height: 130px; border-radius: 14px; border: 3px solid #2a3a46; background: var(--obsidian);
+      display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 18px 8px 8px; margin-bottom: 14px;
     }
-    .play {
-      position: absolute; inset: 0; margin: auto; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
-      background: rgba(255, 255, 255, 0.9); color: var(--obsidian); animation: beat 1.6s ease-in-out infinite;
-    }
-    @keyframes beat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12); } }
-    .heart { position: absolute; right: 8px; bottom: 16px; color: var(--pink); animation: rise 2.4s ease-in infinite; }
-    @keyframes rise { 0% { transform: translateY(0); opacity: 0; } 20% { opacity: 1; } 100% { transform: translateY(-60px); opacity: 0; } }
-    .progress { position: absolute; left: 8px; right: 8px; bottom: 6px; height: 3px; border-radius: 2px; background: rgba(255, 255, 255, 0.25); }
-    .progress span { display: block; height: 100%; border-radius: 2px; background: var(--gold); animation: play 4s linear infinite; }
-    @keyframes play { from { width: 0; } to { width: 100%; } }
+    .notch { position: absolute; top: 4px; width: 22px; height: 4px; border-radius: 2px; background: #2a3a46; }
+    .ui { width: 100%; height: 24px; border-radius: 5px; background: var(--gradient); }
+    .ui.short { height: 10px; width: 70%; background: #2a3a46; }
+    .phone .btn { margin-top: auto; width: 80%; height: 12px; border-radius: 6px; background: #2fbf71; }
 
-    .kit { --tilt: 4deg; bottom: 4%; left: 2%; width: 34%; animation-delay: 2s; }
-    .swatches { display: flex; gap: 5px; }
-    .swatches span {
-      flex: 1; aspect-ratio: 1; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.15);
-      animation: pop 3s ease-in-out infinite;
-    }
-    .swatches span:nth-child(2) { animation-delay: 0.15s; }
-    .swatches span:nth-child(3) { animation-delay: 0.3s; }
-    .swatches span:nth-child(4) { animation-delay: 0.45s; }
-    .swatches span:nth-child(5) { animation-delay: 0.6s; }
-    @keyframes pop { 0%, 70%, 100% { transform: none; } 80% { transform: translateY(-5px) scale(1.1); } }
-    .type { display: flex; align-items: baseline; gap: 8px; margin-top: 8px; }
-    .type b { font: 800 1.3rem var(--font-head); color: #fff; }
-    .type span { font-size: 0.62rem; color: var(--muted); }
+    .chart { min-height: 140px; }
+    .bars { display: flex; align-items: flex-end; gap: 6px; height: 84px; }
+    .bars span { flex: 1; border-radius: 4px 4px 0 0; background: var(--gradient); }
+    .bars span:nth-child(1) { height: 30%; }
+    .bars span:nth-child(2) { height: 48%; }
+    .bars span:nth-child(3) { height: 42%; }
+    .bars span:nth-child(4) { height: 70%; }
+    .bars span:nth-child(5) { height: 96%; }
 
-    .growth { --tilt: -4deg; bottom: 2%; right: 0; width: 34%; animation-delay: 3s; }
-    .bars { display: flex; align-items: flex-end; gap: 5px; height: 60px; }
-    .bars span {
-      flex: 1; height: var(--h); border-radius: 4px 4px 0 0; background: var(--gradient); transform-origin: bottom;
-      animation: grow 3s ease-in-out infinite;
+    .palette { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; align-content: start; min-height: 110px; }
+    .palette span { aspect-ratio: 1; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.12); }
+
+    .ledger { min-height: 130px; color: var(--gold); }
+    .ledger .lines { display: grid; gap: 6px; margin-top: 10px; }
+    .ledger .lines span { height: 7px; border-radius: 4px; background: #22303a; }
+    .ledger .lines span:nth-child(2) { width: 75%; }
+    .ledger .lines span:nth-child(3) { width: 55%; background: rgba(47, 191, 113, 0.5); }
+
+    .quote { display: grid; place-items: center; min-height: 150px; text-align: center; background: linear-gradient(160deg, var(--midnight), var(--obsidian)); }
+    .quote span { font: 600 1.05rem/1.35 var(--font-head); color: #eef1f3; }
+    .quote b { color: var(--gold); }
+
+    /* Light sweep across the wall */
+    .shine {
+      position: absolute; inset: 0; pointer-events: none;
+      background: linear-gradient(105deg, transparent 35%, rgba(243, 209, 141, 0.12) 50%, transparent 65%);
+      background-size: 250% 100%; animation: sweep 7s ease-in-out infinite;
     }
-    @keyframes grow { 0% { transform: scaleY(0.15); } 40%, 85% { transform: scaleY(1); } 100% { transform: scaleY(0.15); } }
-    .growth strong { display: block; margin-top: 6px; font: 700 0.85rem var(--font-head); color: #2fbf71; }
+    @keyframes sweep { 0% { background-position: 150% 0; } 60%, 100% { background-position: -100% 0; } }
 
     @media (max-width: 640px) {
-      .card { padding: 8px; }
-      .card small { font-size: 0.6rem; }
-      .banner { height: 30px; }
-      .bars { height: 40px; }
+      .stage { height: 460px; }
+      .wall { gap: 10px; }
+      .strip { gap: 10px; }
+      .tile { padding: 10px; border-radius: 14px; }
     }
   `,
 })
 export class AboutVisual {
-  protected readonly palette = ['#090e13', '#101b22', '#d8ae62', '#f3d18d', '#fffbf4'];
-  protected readonly bars = [30, 45, 40, 62, 70, 88, 100];
+  protected readonly speeds = [34, 42, 30];
+
+  protected readonly columns: Tile[][] = [
+    [
+      { kind: 'logo', src: 'images/logo-full.png', alt: "Hari's Digital Den", tall: true },
+      { kind: 'social', icon: 'instagram', label: 'Reels', bg: 'linear-gradient(45deg, #f9ce34, #ee2a7b, #6228d7)' },
+      { kind: 'palette' },
+      { kind: 'word', text: 'Brand' },
+      { kind: 'logo', src: 'images/brands/vsn-interiors.webp', alt: 'VSN Interiors' },
+      { kind: 'ledger' },
+    ],
+    [
+      { kind: 'web' },
+      { kind: 'logo', src: 'images/brands/mirai.png', alt: 'Mirai', light: true },
+      { kind: 'word', text: 'Content' },
+      { kind: 'social', icon: 'facebook', label: 'Facebook', bg: '#1877f2' },
+      { kind: 'chart' },
+      { kind: 'logo', src: 'images/brands/inchx-interio.png', alt: 'InchX Interio' },
+    ],
+    [
+      { kind: 'app' },
+      { kind: 'word', text: 'Growth' },
+      { kind: 'social', icon: 'linkedin', label: 'LinkedIn', bg: '#0a66c2' },
+      { kind: 'quote' },
+      { kind: 'social', icon: 'youtube', label: 'YouTube', bg: '#ff0000' },
+      { kind: 'logo', src: 'images/logo-full.png', alt: "Hari's Digital Den" },
+    ],
+  ];
+
+  protected readonly rx = signal(0);
+  protected readonly ry = signal(0);
+
+  protected tilt(e: PointerEvent): void {
+    const el = e.currentTarget as HTMLElement;
+    const r = el.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width - 0.5;
+    const y = (e.clientY - r.top) / r.height - 0.5;
+    this.ry.set(x * 12);
+    this.rx.set(-y * 10);
+  }
+
+  protected reset(): void {
+    this.rx.set(0);
+    this.ry.set(0);
+  }
 }
