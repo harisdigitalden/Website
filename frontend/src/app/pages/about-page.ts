@@ -42,6 +42,10 @@ const WORDS = ['Websites', 'Mobile Apps', 'Reels', 'Brands', 'Growth'];
             your logo and business stationery, and posting fresh content every week. You focus on your
             business — we help it grow. DM us and let's grow together!
           </p>
+          <p>
+            We work with businesses across Andhra Pradesh, Telangana and beyond — in Hyderabad,
+            Visakhapatnam (Vizag), Vijayawada, Guntur, Tirupati, Warangal, Bengaluru and more.
+          </p>
           <div class="motto">
             <span>Brand</span><i></i><span>Content</span><i></i><span>Growth</span>
           </div>
@@ -52,12 +56,20 @@ const WORDS = ['Websites', 'Mobile Apps', 'Reels', 'Brands', 'Growth'];
       </div>
     </section>
 
-    <div class="ticker" aria-hidden="true">
-      <div class="ticker-track">
-        @for (t of tickerLoop; track $index) {
-          <span>{{ t }}</span><b>✦</b>
-        }
+    <!-- Cities we serve: pin cards on a moving route, right to left -->
+    <div class="cities">
+      <span class="label">📍 We serve</span>
+      <div class="route" aria-hidden="true">
+        <div class="track">
+          @for (c of citiesLoop; track $index) {
+            <div class="pin" [style.--i]="$index" [title]="c.name + ' — famous for ' + c.famous">
+              <span class="emoji">{{ c.emoji }}</span>
+              <b class="name">{{ c.name }}</b>
+            </div>
+          }
+        </div>
       </div>
+      <span class="sr-only">We serve {{ cityNames }}.</span>
     </div>
 
     <section class="section">
@@ -103,12 +115,53 @@ const WORDS = ['Websites', 'Mobile Apps', 'Reels', 'Brands', 'Growth'];
     .motto { display: flex; align-items: center; gap: 14px; margin-top: 26px; font: 600 0.8rem var(--font-head); letter-spacing: 0.3em; text-transform: uppercase; color: var(--champagne); }
     .motto i { width: 28px; height: 1px; background: var(--gold); }
 
-    /* Scrolling services ticker */
-    .ticker { overflow: hidden; padding: 22px 0; background: var(--gradient); }
-    .ticker-track { display: flex; align-items: center; gap: 28px; width: max-content; animation: tick 40s linear infinite; }
-    .ticker span { font: 800 clamp(1.2rem, 2.4vw, 1.8rem) var(--font-head); color: var(--obsidian); white-space: nowrap; }
-    .ticker b { color: var(--obsidian); opacity: 0.6; }
-    @keyframes tick { to { transform: translateX(-50%); } }
+    /* Cities band: pin cards travelling right to left along a dashed gold route */
+    .cities {
+      position: relative; overflow: hidden; padding: 26px 0; background: var(--midnight);
+      border-block: 1px solid var(--border);
+    }
+    .cities::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 190px; z-index: 2;
+      background: linear-gradient(90deg, var(--midnight) 70%, transparent);
+    }
+    .cities::after {
+      content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 80px; z-index: 2;
+      background: linear-gradient(270deg, var(--midnight), transparent);
+    }
+    .label {
+      position: absolute; left: 16px; top: 50%; transform: translateY(-50%); z-index: 3; padding: 8px 16px; border-radius: 999px;
+      background: var(--gradient); color: var(--obsidian); font: 700 0.85rem var(--font-head); white-space: nowrap;
+      box-shadow: 0 0 0 0 rgba(216, 174, 98, 0.6); animation: ping 4s ease-out infinite;
+    }
+    @keyframes ping { 0% { box-shadow: 0 0 0 0 rgba(216, 174, 98, 0.55); } 100% { box-shadow: 0 0 0 14px rgba(216, 174, 98, 0); } }
+    .route { position: relative; }
+    /* The dashed route line the cards travel along */
+    .route::before {
+      content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 2px;
+      background: repeating-linear-gradient(90deg, rgba(216, 174, 98, 0.7) 0 10px, transparent 10px 20px);
+      background-size: 20px 2px; animation: dash 4s linear infinite;
+    }
+    @keyframes dash { to { background-position: -20px 0; } }
+    .track { position: relative; display: flex; align-items: center; gap: 34px; width: max-content; padding-left: 34px; animation: travel 160s linear infinite; }
+    .route:hover .track { animation-play-state: paused; }
+    @keyframes travel { to { transform: translateX(-50%); } }
+
+    .pin {
+      display: flex; align-items: center; gap: 12px; padding: 8px 18px 8px 8px; border-radius: 999px; white-space: nowrap;
+      background: var(--charcoal); border: 1px solid rgba(216, 174, 98, 0.35); box-shadow: 0 8px 22px rgba(0, 0, 0, 0.4);
+      transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+    }
+    .pin:hover { transform: translateY(-6px) scale(1.05); border-color: var(--gold); box-shadow: 0 14px 30px rgba(216, 174, 98, 0.25); }
+    .emoji {
+      width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; font-size: 1.6rem;
+      background: radial-gradient(circle at 35% 30%, #1c2c38, var(--obsidian)); border: 2px solid var(--gold);
+      box-shadow: 0 0 14px rgba(216, 174, 98, 0.35);
+      /* each pin bobs a little after the previous one, making a wave */
+      animation: bob 5s ease-in-out calc(var(--i) * -0.4s) infinite;
+    }
+    @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+    .name { font: 700 1.05rem var(--font-head); color: #fff; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
     .value {
       padding: 30px 26px; border-radius: var(--radius); background: var(--charcoal); border: 1px solid var(--border);
@@ -133,12 +186,30 @@ export class AboutPage {
     { icon: 'users', title: 'Partnerships', text: 'We help you build collaborations that grow your reach.' },
   ];
 
-  private readonly ticker = [
-    'Websites', 'Mobile Apps', 'Instagram', 'Facebook', 'LinkedIn', 'YouTube', 'Reels',
-    'Branding', 'Business Email', 'Digital Ledger',
+  // Cities we serve, each with what it's famous for.
+  private readonly cities = [
+    { name: 'Hyderabad', emoji: '🕌', famous: 'Charminar & biryani' },
+    { name: 'Secunderabad', emoji: '🚆', famous: 'Railway junction' },
+    { name: 'Visakhapatnam', emoji: '🏖️', famous: 'Beaches & port' },
+    { name: 'Vijayawada', emoji: '🌉', famous: 'Prakasam Barrage' },
+    { name: 'Guntur', emoji: '🌶️', famous: 'Chillies' },
+    { name: 'Tirupati', emoji: '🛕', famous: 'Tirumala temple' },
+    { name: 'Nellore', emoji: '🦐', famous: 'Prawns & seafood' },
+    { name: 'Kakinada', emoji: '🍬', famous: 'Kakinada Kaja' },
+    { name: 'Rajahmundry', emoji: '🌊', famous: 'Godavari river' },
+    { name: 'Warangal', emoji: '🏰', famous: 'Warangal Fort' },
+    { name: 'Karimnagar', emoji: '✨', famous: 'Silver filigree' },
+    { name: 'Kurnool', emoji: '💎', famous: 'Diamond hunting' },
+    { name: 'Khammam', emoji: '🪨', famous: 'Granite' },
+    { name: 'Nizamabad', emoji: '🌿', famous: 'Turmeric' },
+    { name: 'Anantapur', emoji: '🥜', famous: 'Groundnuts' },
+    { name: 'Ongole', emoji: '🐂', famous: 'Ongole bulls' },
+    { name: 'Eluru', emoji: '🧶', famous: 'Hand-woven carpets' },
+    { name: 'Bengaluru', emoji: '💻', famous: 'India’s IT city' },
   ];
   // Doubled so the -50% scroll loops seamlessly.
-  protected readonly tickerLoop = [...this.ticker, ...this.ticker];
+  protected readonly citiesLoop = [...this.cities, ...this.cities];
+  protected readonly cityNames = this.cities.map((c) => c.name).join(', ');
 
   private readonly tick = signal(0);
   // A new key each tick re-creates the word so its animation replays.
