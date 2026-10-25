@@ -1,0 +1,7 @@
+{
+  "recommendations": [
+    "angular.ng-template",
+    "golang.go",
+    "esbenp.prettier-vscode"
+  ]
+}

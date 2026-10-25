@@ -1,0 +1,7 @@
+**/node_modules
+frontend/dist
+frontend/.angular
+backend/*.exe
+backend/data
+.vscode
+.git

@@ -1,0 +1,45 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "backend: run (Go API :8080)",
+      "type": "shell",
+      "command": "go run .",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "go",
+        "pattern": { "regexp": "^(.*):(\\d+):(\\d+):\\s+(.*)$", "file": 1, "line": 2, "column": 3, "message": 4 },
+        "background": { "activeBegin": ".", "activeEnd": "listening on" }
+      },
+      "presentation": { "panel": "dedicated", "group": "dev" }
+    },
+    {
+      "label": "frontend: serve (Angular :4200)",
+      "type": "npm",
+      "script": "start",
+      "path": "frontend",
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "angular",
+        "pattern": "$tsc",
+        "background": { "activeBegin": "Building", "activeEnd": "Local:" }
+      },
+      "presentation": { "panel": "dedicated", "group": "dev" }
+    },
+    {
+      "label": "dev: start both",
+      "dependsOn": ["backend: run (Go API :8080)", "frontend: serve (Angular :4200)"],
+      "dependsOrder": "parallel",
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "build: production",
+      "type": "shell",
+      "command": "npm run build --prefix frontend; if ($?) { cd backend; go build -o adharis-api.exe . }",
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    }
+  ]
+}

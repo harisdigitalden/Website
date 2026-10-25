@@ -1,0 +1,9 @@
+# Render Blueprint: deploys the site as one free web service.
+# The service name becomes the URL: https://harisdigitalden.onrender.com
+services:
+  - type: web
+    name: harisdigitalden
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/health
+    autoDeploy: true
