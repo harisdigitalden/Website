@@ -61,8 +61,11 @@ type Showcase struct {
 }
 
 type InstagramPost struct {
-	Type string `json:"type"` // "reel" or "p"
-	Code string `json:"code"`
+	Type  string `json:"type"` // "reel" or "p"
+	Code  string `json:"code"`
+	Label string `json:"label,omitempty"` // story highlight name, e.g. "Kitchen"
+	Emoji string `json:"emoji,omitempty"`
+	Image string `json:"image,omitempty"` // full-resolution copy in frontend/public/images/showcase/
 }
 
 type FAQ struct {
@@ -158,11 +161,16 @@ var showcases = []Showcase{
 		Profile: "https://www.instagram.com/inchxinterio/",
 		Logo:    "images/brands/inchx-interio.png",
 		Bio:     "Transforming spaces inch by inch. Homes, villas, offices, malls & showrooms — pan-India.",
+		// Photo posts only, one per story highlight. Images are full-resolution
+		// copies of the posts; tapping a story opens the post on Instagram.
 		Posts: []InstagramPost{
-			{Type: "reel", Code: "DeowsI1NVvB"},
-			{Type: "p", Code: "De4EWu-FNS-"},
-			{Type: "reel", Code: "DeUkt5xRxPf"},
-			{Type: "p", Code: "De1wX3Sn58O"},
+			{Type: "p", Code: "De4EWu-FNS-", Label: "Living Room", Emoji: "🛋️", Image: "images/showcase/inchx-living-room.jpg"},
+			{Type: "p", Code: "De1wX3Sn58O", Label: "Bedroom", Emoji: "🛏️", Image: "images/showcase/inchx-bedroom.jpg"},
+			{Type: "p", Code: "Dej7jdqH5z3", Label: "Kitchen", Emoji: "🍳", Image: "images/showcase/inchx-kitchen.jpg"},
+			{Type: "p", Code: "DeRtefoFFfk", Label: "Dining", Emoji: "🍽️", Image: "images/showcase/inchx-dining.jpg"},
+			{Type: "p", Code: "Del6dNlEVo8", Label: "Office", Emoji: "🏢", Image: "images/showcase/inchx-office.jpg"},
+			{Type: "p", Code: "DeuOHFqHzCu", Label: "Colour Themes", Emoji: "🎨", Image: "images/showcase/inchx-colour-themes.jpg"},
+			{Type: "p", Code: "Deb9-EalLq3", Label: "Traditional & Modern", Emoji: "🏛️", Image: "images/showcase/inchx-traditional-modern.jpg"},
 		},
 	},
 }

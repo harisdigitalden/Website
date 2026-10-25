@@ -44,6 +44,9 @@ export interface Brand {
 export interface InstagramPost {
   type: 'reel' | 'p';
   code: string;
+  label?: string;
+  emoji?: string;
+  image?: string;
 }
 
 export interface Showcase {
