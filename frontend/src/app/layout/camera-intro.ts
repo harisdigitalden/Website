@@ -117,10 +117,6 @@ const INTRO_MS = 2900;
     }
     .tag i { width: 22px; height: 1px; background: #d8ae62; }
     @keyframes tag { to { opacity: 1; } }
-
-    @media (prefers-reduced-motion: reduce) {
-      .intro { display: none; }
-    }
   `,
 })
 export class CameraIntro {
@@ -133,7 +129,6 @@ export class CameraIntro {
   constructor() {
     const destroyRef = inject(DestroyRef);
     afterNextRender(() => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
       this.visible.set(true);
       document.body.style.overflow = 'hidden';
       this.timer = setTimeout(() => this.end(), INTRO_MS);

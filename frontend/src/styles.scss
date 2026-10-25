@@ -496,19 +496,5 @@ ul {
   transform: none;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .reveal {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation: none !important;
-    transition: none !important;
-    scroll-behavior: auto !important;
-  }
-}
+/* Animations intentionally run the same on every device, including phones with
+   "reduce motion" / battery saver turned on (which used to disable them). */
