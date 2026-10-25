@@ -72,10 +72,6 @@ const POST_CODE = /^[A-Za-z0-9_-]+$/;
                   </button>
                 }
               </div>
-
-              <a class="btn btn--insta" [href]="s.profile" target="_blank" rel="noopener">
-                <app-icon name="instagram" [size]="18" /> Follow &#64;{{ s.handle }}
-              </a>
             </div>
 
             <div class="phone" (pointerdown)="held.set(true)" (pointerup)="held.set(false)" (pointerleave)="held.set(false)">
@@ -172,8 +168,9 @@ const POST_CODE = /^[A-Za-z0-9_-]+$/;
     .who strong { font: 700 1.2rem var(--font-head); }
     .who small { color: var(--gold); font-weight: 600; }
     .bio { color: var(--muted); font-size: 0.92rem; margin-top: 4px; }
-    .highlights { display: flex; flex-wrap: wrap; gap: 16px; }
-    .highlights button { display: grid; justify-items: center; gap: 6px; width: 70px; padding: 0; border: 0; background: none; cursor: pointer; }
+    .highlights { display: flex; flex-wrap: nowrap; gap: 14px; max-width: 100%; overflow-x: auto; scrollbar-width: none; padding: 4px 2px; }
+    .highlights::-webkit-scrollbar { display: none; }
+    .highlights button { flex: 0 0 auto; display: grid; justify-items: center; align-content: start; gap: 6px; width: 70px; padding: 0; border: 0; background: none; cursor: pointer; }
     .bubble {
       position: relative; width: 64px; height: 64px; border-radius: 50%; background: var(--obsidian);
       border: 3px solid var(--obsidian); box-shadow: 0 0 0 2px rgba(216, 174, 98, 0.45); transition: box-shadow 0.25s, transform 0.25s;
@@ -182,7 +179,6 @@ const POST_CODE = /^[A-Za-z0-9_-]+$/;
     .bubble i { position: absolute; right: -6px; bottom: -4px; font-style: normal; font-size: 1rem; }
     .highlights button.on .bubble { box-shadow: 0 0 0 3px var(--gold); transform: scale(1.08); }
     .highlights small { font: 600 0.72rem/1.2 var(--font-head); color: #d9dee2; text-align: center; }
-    .btn--insta { background: linear-gradient(45deg, #f9ce34, #ee2a7b, #6228d7); color: #fff; }
 
     /* The story viewer: Instagram post shape (4:5) so square and wide photos fit large */
     .phone {

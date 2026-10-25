@@ -168,7 +168,6 @@ var showcases = []Showcase{
 			{Type: "p", Code: "De1wX3Sn58O", Label: "Bedroom", Emoji: "🛏️", Image: "images/showcase/inchx-bedroom.jpg"},
 			{Type: "p", Code: "Dej7jdqH5z3", Label: "Kitchen", Emoji: "🍳", Image: "images/showcase/inchx-kitchen.jpg"},
 			{Type: "p", Code: "DeRtefoFFfk", Label: "Dining", Emoji: "🍽️", Image: "images/showcase/inchx-dining.jpg"},
-			{Type: "p", Code: "Del6dNlEVo8", Label: "Office", Emoji: "🏢", Image: "images/showcase/inchx-office.jpg"},
 			{Type: "p", Code: "DeuOHFqHzCu", Label: "Colour Themes", Emoji: "🎨", Image: "images/showcase/inchx-colour-themes.jpg"},
 			{Type: "p", Code: "Deb9-EalLq3", Label: "Traditional & Modern", Emoji: "🏛️", Image: "images/showcase/inchx-traditional-modern.jpg"},
 		},
