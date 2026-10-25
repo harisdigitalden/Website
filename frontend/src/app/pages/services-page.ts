@@ -1,12 +1,13 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CtaBanner } from '../sections/cta-banner';
 import { Process } from '../sections/process';
+import { ServicesMovie } from '../sections/movie/services-movie';
 import { ServicesGrid } from '../sections/services-grid';
 import { PageHero } from '../shared/page-hero';
 
 @Component({
   selector: 'app-services-page',
-  imports: [PageHero, ServicesGrid, Process, CtaBanner],
+  imports: [PageHero, ServicesMovie, ServicesGrid, Process, CtaBanner],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-page-hero
@@ -14,7 +15,8 @@ import { PageHero } from '../shared/page-hero';
       heading="Our Digital Marketing Services"
       subtitle="Websites, mobile apps, social media setup & marketing, branding, business email and digital ledger — everything you need to grow online."
     />
-    <app-services-grid />
+    <app-services-movie />
+    <app-services-grid [orbit]="false" />
     <app-process />
     <div class="spacer"></div>
     <app-cta-banner />

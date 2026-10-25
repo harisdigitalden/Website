@@ -25,7 +25,9 @@ import { ServicesOrbit } from './services-orbit';
           </p>
         </div>
 
-        <app-services-orbit />
+        @if (orbit()) {
+          <app-services-orbit />
+        }
 
         @if (services().length) {
           <div class="tabs" role="tablist" aria-label="Services">
@@ -126,6 +128,8 @@ export class ServicesGrid {
   private readonly route = inject(ActivatedRoute);
 
   readonly soft = input(false);
+  /** Show the orbit illustration (Home). The Services page uses the film strip instead. */
+  readonly orbit = input(true);
 
   protected readonly services = toSignal(this.api.services$, { initialValue: [] });
   private readonly tabParam = toSignal(this.route.queryParamMap.pipe(map((p) => p.get('tab') ?? '')), { initialValue: '' });
